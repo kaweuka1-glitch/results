@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Результаты</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* tokens.css — те же переменные */
+:root {
+  --bg: #0f1419; --surface: #171d24; --surface-2: #1e252e; --border: #2a333d; --border-input: #5f6b78;
+  --text: #e8edf2; --text-muted: #9aa6b2; --accent: #4cc9b0; --on-accent: #062a24;
+  --success: #3ecf8e; --danger: #ff7a7a; --warning: #f5b84b; --chart-2: #8aa4ff;
+  --font-sans: Inter, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --s-1: 4px; --s-2: 8px; --s-3: 12px; --s-4: 16px; --s-5: 24px; --s-6: 32px; --s-7: 48px;
+  --r-sm: 6px; --r-md: 10px; --r-lg: 16px; --r-pill: 999px;
+  --shadow-card: 0 1px 2px rgba(0,0,0,.30), 0 2px 8px rgba(0,0,0,.25);
+  --fast: 120ms; --ease: cubic-bezier(.2,.8,.2,1);
+  --max-width: 1120px; --gutter: 24px;
+  color-scheme: dark;
+}
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme="dark"]) {
+    --bg: #ffffff; --surface: #f5f7f9; --surface-2: #eceff3; --border: #dfe4ea; --border-input: #7a8591;
+    --text: #121820; --text-muted: #556170; --accent: #0d7f6a; --on-accent: #ffffff;
+    --success: #147548; --danger: #b9343a; --warning: #8a5a00; --chart-2: #4561c9;
+    --shadow-card: 0 1px 2px rgba(16,24,40,.06), 0 1px 3px rgba(16,24,40,.10);
+    color-scheme: light;
+  }
+}
+:root[data-theme="light"] {
+  --bg: #ffffff; --surface: #f5f7f9; --surface-2: #eceff3; --border: #dfe4ea; --border-input: #7a8591;
+  --text: #121820; --text-muted: #556170; --accent: #0d7f6a; --on-accent: #ffffff;
+  --success: #147548; --danger: #b9343a; --warning: #8a5a00; --chart-2: #4561c9;
+  --shadow-card: 0 1px 2px rgba(16,24,40,.06), 0 1px 3px rgba(16,24,40,.10);
+  color-scheme: light;
+}
+@media (max-width: 640px) { :root { --gutter: 16px; } }
+
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--text); font: 400 16px/24px var(--font-sans);
+       font-variant-numeric: tabular-nums; -webkit-font-smoothing: antialiased; }
+.wrap { max-width: var(--max-width); margin: 0 auto; padding: var(--s-5) var(--gutter) var(--s-7); }
+.note { font-size: 12px; line-height: 16px; color: var(--text-muted); }
+h1 { font: 700 28px/34px var(--font-sans); margin: 0; }
+h2 { font: 600 20px/28px var(--font-sans); margin: 0 0 var(--s-4); }
+.muted { color: var(--text-muted); }
+.plus { color: var(--success); } .minus { color: var(--danger); }
+
+.topbar { display: flex; justify-content: space-between; align-items: center; gap: var(--s-3); margin-bottom: var(--s-5); }
+.logo { display: flex; align-items: center; gap: var(--s-2); font-weight: 700; }
+.logo svg { color: var(--accent); }
+
+.btn { font: 600 14px/20px var(--font-sans); border-radius: var(--r-md); padding: 0 var(--s-4); height: 40px;
+       border: 1px solid transparent; cursor: pointer; display: inline-flex; align-items: center; gap: var(--s-2);
+       transition: background var(--fast) var(--ease), border-color var(--fast) var(--ease); }
+.btn-sm { height: 32px; padding: 0 var(--s-3); }
+.btn-primary { background: var(--accent); color: var(--on-accent); }
+.btn-primary:hover { filter: brightness(1.08); }
+.btn-secondary { background: var(--surface-2); color: var(--text); border-color: var(--border); }
+.btn-secondary:hover { border-color: var(--border-input); }
+.btn-ghost { background: transparent; color: var(--text-muted); }
+.btn-ghost:hover { color: var(--text); background: var(--surface-2); }
+.btn:disabled { opacity: .5; cursor: not-allowed; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+.card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-lg);
+        padding: var(--s-5); box-shadow: var(--shadow-card); }
+@media (max-width: 640px) { .card { padding: var(--s-4); } }
+
+.badges { display: flex; flex-wrap: wrap; gap: var(--s-2); margin-top: var(--s-3); }
+.badge { font: 500 12px/16px var(--font-sans); border-radius: var(--r-pill); padding: 2px 10px;
+         background: var(--surface-2); color: var(--text-muted); border: 1px solid var(--border); display: inline-flex; gap: 6px; align-items: center; }
+.badge.ok { color: var(--success); } .badge.warn { color: var(--warning); } .badge.bad { color: var(--danger); }
+.dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+
+.stale { display: flex; gap: var(--s-3); align-items: flex-start; margin: var(--s-4) 0;
+         background: color-mix(in srgb, var(--warning) 12%, transparent); border-left: 3px solid var(--warning);
+         border-radius: var(--r-md); padding: var(--s-3) var(--s-4); font-size: 14px; line-height: 20px; }
+.stale svg { color: var(--warning); flex: none; margin-top: 2px; }
+
+.grid { display: grid; gap: var(--s-4); grid-template-columns: 1fr; margin-top: var(--s-4); }
+@media (min-width: 900px) { .grid { grid-template-columns: 340px 1fr; } }
+
+.hero-label { font-size: 14px; color: var(--text-muted); }
+.hero { font: 700 40px/44px var(--font-sans); margin: var(--s-1) 0 var(--s-4); letter-spacing: -.5px; }
+.hero-sub { display: flex; gap: var(--s-5); }
+.hero-sub b { display: block; font: 600 20px/28px var(--font-sans); }
+.metrics { margin: var(--s-5) 0 0; padding: var(--s-4) 0 0; border-top: 1px solid var(--border); display: grid; gap: var(--s-2); }
+.metrics div { display: flex; justify-content: space-between; font-size: 14px; line-height: 20px; }
+.metrics dt { color: var(--text-muted); } .metrics dd { margin: 0; font-weight: 500; }
+.metrics small { color: var(--text-muted); font-size: 12px; margin-right: 6px; }
+
+.tabs { display: inline-flex; background: var(--surface-2); border-radius: var(--r-md); padding: 3px; gap: 2px; margin-bottom: var(--s-4); }
+.tab { font: 500 14px/20px var(--font-sans); border: 0; background: transparent; color: var(--text-muted);
+       padding: 6px var(--s-3); border-radius: 8px; cursor: pointer; }
+.tab[aria-selected="true"] { background: var(--surface); color: var(--text); box-shadow: var(--shadow-card); }
+.tab:hover { color: var(--text); }
+.chart { width: 100%; height: 240px; display: block; }
+.legend { display: flex; gap: var(--s-4); font-size: 12px; color: var(--text-muted); margin-top: var(--s-2); }
+.legend i { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 6px; vertical-align: -1px; }
+
+table { width: 100%; border-collapse: collapse; font-size: 14px; line-height: 20px; }
+th { text-align: left; font: 500 12px/16px var(--font-sans); color: var(--text-muted); padding: var(--s-2) var(--s-3); border-bottom: 1px solid var(--border); }
+td { padding: var(--s-2) var(--s-3); border-bottom: 1px solid var(--border); }
+th:not(:first-child), td:not(:first-child) { text-align: right; }
+tr:last-child td { border-bottom: 0; }
+
+.cards { display: grid; gap: var(--s-4); grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); }
+a.acc { display: block; color: inherit; text-decoration: none; transition: border-color var(--fast) var(--ease); }
+a.acc:hover { border-color: var(--accent); }
+.acc .g { font: 700 28px/34px var(--font-sans); margin: var(--s-2) 0; }
+.acc .row { display: flex; justify-content: space-between; font-size: 14px; color: var(--text-muted); }
+.spark { width: 100%; height: 40px; margin-top: var(--s-3); }
+
+.empty { text-align: center; padding: var(--s-6) var(--s-4); color: var(--text-muted); }
+.empty svg { color: var(--border-input); margin-bottom: var(--s-2); }
+.section { margin-top: var(--s-7); }
+.section > .note { margin-bottom: var(--s-3); text-transform: uppercase; letter-spacing: .06em; }
+footer { margin-top: var(--s-7); font-size: 12px; line-height: 16px; color: var(--text-muted); border-top: 1px solid var(--border); padding-top: var(--s-4); }
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="topbar">
+    <div class="logo">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="3 17 9 11 13 15 21 7"/><polyline points="15 7 21 7 21 13"/></svg>
+      Результаты
+    </div>
+    <button class="btn btn-ghost btn-sm" id="theme" type="button">Светлая тема</button>
+  </div>
+
+  <main id="app" aria-busy="true"><div class="card empty">Загружаю данные…</div></main>
+
+  <footer id="foot">Прошлые результаты не гарантируют будущих. Это не инвестиционный совет.</footer>
+</div>
+
+<script>
+const $ = (s, el = document) => el.querySelector(s);
+const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+const nf = (v, d = 2) => v == null ? '—' : v.toLocaleString('ru-RU', { minimumFractionDigits: d, maximumFractionDigits: d });
+const pct = (v, d = 2) => v == null ? '—' : (v > 0 ? '+' : v < 0 ? '−' : '') + nf(Math.abs(v), d) + ' %';
+const money = (v, cur) => v == null ? '—' : (v < 0 ? '−' : '') + nf(Math.abs(v)) + (cur === 'USD' ? ' $' : ' ' + cur);
+const cls = v => v > 0 ? 'plus' : v < 0 ? 'minus' : 'muted';
+const ddmm = iso => iso.slice(8, 10) + '.' + iso.slice(5, 7);
+const ago = ts => { const m = Math.round((Date.now() / 1000 - ts) / 60);
+  return m < 60 ? `${m} мин назад` : m < 1440 ? `${Math.round(m / 60)} ч назад` : `${Math.round(m / 1440)} дн. назад`; };
+const MONTHS = ['янв', 'фев', 'мар', 'апр', 'май', 'июн', 'июл', 'авг', 'сен', 'окт', 'ноя', 'дек'];
+let D = null, mode = 'growth';
+
+function render() {
+  const cur = D.currency, started = D.started.split('-').reverse().join('.');
+  $('#app').innerHTML = `
+    <h1>${D.name}</h1>
+    <div class="muted" style="font-size:14px;margin-top:4px">${D.subtitle} · с ${started}</div>
+    <div class="badges">
+      <span class="badge"><span class="dot"></span>Обновлено ${ago(D.updated_at)}</span>
+      ${D.bonus ? `<span class="badge warn">Бонус брокера ${money(D.bonus, cur)} — не входит в прирост</span>` : ''}
+    </div>
+    ${D.stale ? `<div class="stale" role="status"><div>Данные от ${new Date(D.updated_at * 1000).toLocaleString('ru-RU', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })} — счёт давно не обновлялся. Цифры могут быть неточными.</div></div>` : ''}
+    <div class="grid">
+      <div class="card">
+        <div class="hero-label">Прирост с ${started}</div>
+        <div class="hero ${cls(D.gain)}">${pct(D.gain)}</div>
+        <div class="hero-sub">
+          <div><span class="hero-label">Просадка</span><b class="${cls(D.drawdown)}">${pct(D.drawdown)}</b></div>
+          <div><span class="hero-label">Абс. прирост</span><b class="${cls(D.abs_gain)}">${pct(D.abs_gain)}</b></div>
+        </div>
+        <dl class="metrics">
+          <div><dt>Баланс</dt><dd>${money(D.balance, cur)}</dd></div>
+          <div><dt>Эквити</dt><dd><small>${nf(D.equity_pct, 1)} %</small>${money(D.equity, cur)}</dd></div>
+          <div><dt>Прибыль</dt><dd class="${cls(D.profit)}">${D.profit > 0 ? '+' : ''}${money(D.profit, cur)}</dd></div>
+          <div><dt>Вводы</dt><dd>${money(D.deposits, cur)}</dd></div>
+          <div><dt>Выводы</dt><dd>${money(D.withdrawals, cur)}</dd></div>
+          <div><dt>В день / в месяц</dt><dd>${nf(D.daily_pct)} % / ${nf(D.monthly_pct)} %</dd></div>
+        </dl>
+      </div>
+      <div class="card">
+        <div class="tabs" role="tablist" aria-label="График">
+          <button class="tab" role="tab" data-k="growth" type="button">Рост</button>
+          <button class="tab" role="tab" data-k="balance" type="button">Баланс</button>
+          <button class="tab" role="tab" data-k="dd" type="button">Просадка</button>
+        </div>
+        ${D.series.length < 2 ? '<div class="empty">График появится через день.</div>' : '<svg class="chart" id="chart" role="img" aria-label="График счёта по дням"></svg>'}
+      </div>
+    </div>
+    <div class="grid" style="grid-template-columns:1fr">
+      <div class="card"><h2>По месяцам</h2><svg class="chart" id="months" style="height:180px" role="img" aria-label="Прирост по месяцам"></svg>
+        <table class="sr"><caption>Прирост по месяцам</caption><tbody>${D.months.map(([m, v]) => `<tr><td>${m}</td><td>${pct(v)}</td></tr>`).join('')}</tbody></table>
+      </div>
+    </div>
+    <div class="grid" style="grid-template-columns:1fr">
+      <div class="card">
+        <h2>Закрытые сделки <span class="muted" style="font-weight:400">· ${D.trades_closed}</span></h2>
+        ${D.history.length ? `<table><thead><tr><th scope="col">День</th><th scope="col">Инструмент</th><th scope="col">Прибыль</th><th scope="col">% к балансу</th></tr></thead><tbody>
+          ${D.history.map(([d, s, p, g]) => `<tr><td>${ddmm(d)}</td><td>${s}</td><td class="${cls(p)}">${p > 0 ? '+' : ''}${money(p, cur)}</td><td class="${cls(g)}">${pct(g)}</td></tr>`).join('')}
+        </tbody></table>` : '<div class="empty">Закрытых сделок пока нет.</div>'}
+      </div>
+    </div>`;
+  document.querySelectorAll('.tab').forEach(b => {
+    b.setAttribute('aria-selected', b.dataset.k === mode);
+    b.addEventListener('click', () => { mode = b.dataset.k; render(); });
+  });
+  $('#app').setAttribute('aria-busy', 'false');
+  draw();
+}
+
+function line(svg, vals, labels, color, unit) {
+  const w = svg.clientWidth || 600, h = svg.clientHeight || 240, pad = 30;
+  const min = Math.min(0, ...vals), max = Math.max(0, ...vals), span = (max - min) || 1;
+  const x = i => pad + i * (w - pad * 2) / Math.max(1, vals.length - 1), y = v => h - pad - (v - min) / span * (h - pad * 2);
+  const pts = vals.map((v, i) => `${x(i)},${y(v)}`).join(' ');
+  let s = '';
+  for (let k = 0; k <= 3; k++) { const v = min + span * k / 3;
+    s += `<line x1="${pad}" x2="${w - pad}" y1="${y(v)}" y2="${y(v)}" stroke="${css('--border')}"/><text x="${w - pad + 4}" y="${y(v) + 4}" font-size="11" fill="${css('--text-muted')}">${nf(v, unit === '%' ? 1 : 0)}${unit === '%' ? '%' : ''}</text>`; }
+  const step = Math.ceil(labels.length / 6);
+  labels.forEach((l, i) => { if (i % step === 0) s += `<text x="${x(i)}" y="${h - 8}" font-size="11" text-anchor="middle" fill="${css('--text-muted')}">${ddmm(l)}</text>`; });
+  const base = unit === '%' ? y(0) : y(min);
+  s += `<polygon points="${x(0)},${base} ${pts} ${x(vals.length - 1)},${base}" fill="${color}" opacity=".14"/><polyline points="${pts}" fill="none" stroke="${color}" stroke-width="2" stroke-linejoin="round"/>`;
+  svg.innerHTML = s;
+}
+function draw() {
+  const svg = $('#chart'), lab = D.series.map(r => r[0]);
+  if (svg) {
+    if (mode === 'growth') line(svg, D.series.map(r => r[1]), lab, css('--accent'), '%');
+    if (mode === 'balance') line(svg, D.series.map(r => r[2]), lab, css('--chart-2'), 'money');
+    if (mode === 'dd') line(svg, D.series.map(r => r[3]), lab, css('--danger'), '%');
+  }
+  const m = $('#months'), w = m.clientWidth || 600, h = m.clientHeight || 180, base = h / 2 + 6;
+  const bw = Math.min(64, w / (D.months.length * 2 + 1)), mx = Math.max(1, ...D.months.map(r => Math.abs(r[1])));
+  let s = `<line x1="0" x2="${w}" y1="${base}" y2="${base}" stroke="${css('--border')}"/>`;
+  D.months.forEach(([ym, v], i) => { const cx = w / 2 + (i - (D.months.length - 1) / 2) * bw * 1.8, bh = Math.abs(v) / mx * (h / 2 - 34);
+    const col = v >= 0 ? css('--success') : css('--danger'), yy = v >= 0 ? base - bh : base;
+    s += `<rect x="${cx - bw / 2}" y="${yy}" width="${bw}" height="${Math.max(1, bh)}" rx="4" fill="${col}"/>`;
+    s += `<text x="${cx}" y="${v >= 0 ? yy - 6 : yy + bh + 14}" text-anchor="middle" font-size="12" font-weight="600" fill="${col}">${pct(v)}</text>`;
+    s += `<text x="${cx}" y="${h - 4}" text-anchor="middle" font-size="11" fill="${css('--text-muted')}">${MONTHS[+ym.slice(5) - 1]} ${ym.slice(0, 4)}</text>`; });
+  m.innerHTML = s;
+}
+const themeBtn = $('#theme');
+const isLight = () => { const t = document.documentElement.dataset.theme; return t ? t === 'light' : matchMedia('(prefers-color-scheme: light)').matches; };
+const syncBtn = () => { themeBtn.textContent = isLight() ? 'Тёмная тема' : 'Светлая тема'; };
+themeBtn.addEventListener('click', () => { document.documentElement.dataset.theme = isLight() ? 'dark' : 'light'; syncBtn(); if (D) draw(); });
+syncBtn();
+addEventListener('resize', () => D && draw());
+const load = window.RESULTS_DATA ? Promise.resolve(window.RESULTS_DATA) : fetch('data.json', { cache: 'no-store' }).then(r => { if (!r.ok) throw r.status; return r.json(); });
+load.then(d => { D = d; document.title = d.name + ' — Результаты'; render(); })
+    .catch(() => { $('#app').innerHTML = '<div class="card empty"><div style="color:var(--text);font-weight:600">Нет доступа</div><div style="font-size:14px">Ссылка выключена или неверная. Попросите новую у владельца.</div></div>'; });
+</script>
+</body>
+</html>
