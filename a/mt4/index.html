@@ -208,7 +208,7 @@ function render() {
 }
 
 function line(svg, vals, labels, color, unit) {
-  const w = svg.clientWidth || 600, h = svg.clientHeight || 240, pad = 30;
+  const w = svg.clientWidth || 600, h = svg.clientHeight || 240, pad = unit === '%' ? 36 : 52;
   let min = Math.min(...vals), max = Math.max(...vals);
   if (unit === '%') { min = Math.min(0, min); max = Math.max(0, max); }
   else { const m = (max - min) * 0.15 || Math.max(1, Math.abs(max) * 0.002); min -= m; max += m; }   // деньги: масштаб по самим значениям
@@ -217,7 +217,7 @@ function line(svg, vals, labels, color, unit) {
   const pts = vals.map((v, i) => `${x(i)},${y(v)}`).join(' ');
   let s = '';
   for (let k = 0; k <= 3; k++) { const v = min + span * k / 3;
-    s += `<line x1="${pad}" x2="${w - pad}" y1="${y(v)}" y2="${y(v)}" stroke="${css('--border')}"/><text x="${w - pad + 4}" y="${y(v) + 4}" font-size="11" fill="${css('--text-muted')}">${nf(v, unit === '%' ? 1 : 0)}${unit === '%' ? '%' : ''}</text>`; }
+    s += `<line x1="${pad}" x2="${w - pad}" y1="${y(v)}" y2="${y(v)}" stroke="${css('--border')}"/><text x="${w - 2}" y="${y(v) + 4}" font-size="11" text-anchor="end" fill="${css('--text-muted')}">${nf(v, unit === '%' ? 1 : 0)}${unit === '%' ? '%' : ''}</text>`; }
   const step = Math.ceil(labels.length / 6);
   labels.forEach((l, i) => { if (i % step === 0) s += `<text x="${x(i)}" y="${h - 8}" font-size="11" text-anchor="middle" fill="${css('--text-muted')}">${ddmm(l)}</text>`; });
   const base = unit === '%' ? y(0) : y(min);
@@ -225,12 +225,12 @@ function line(svg, vals, labels, color, unit) {
   svg.innerHTML = s;
 }
 function bars(svg, vals, labels, color) {     // просадка по дням столбиками вверх, %
-  const w = svg.clientWidth || 600, h = svg.clientHeight || 240, pad = 30;
+  const w = svg.clientWidth || 600, h = svg.clientHeight || 240, pad = 36;
   const max = Math.max(0.5, ...vals) * 1.1, n = vals.length, slot = (w - pad * 2) / n, bw = Math.max(2, Math.min(18, slot * 0.6));
   const y = v => h - pad - v / max * (h - pad * 2);
   let s = '';
   for (let k = 0; k <= 3; k++) { const v = max * k / 3;
-    s += `<line x1="${pad}" x2="${w - pad}" y1="${y(v)}" y2="${y(v)}" stroke="${css('--border')}"/><text x="${w - pad + 4}" y="${y(v) + 4}" font-size="11" fill="${css('--text-muted')}">${nf(v, 1)}%</text>`; }
+    s += `<line x1="${pad}" x2="${w - pad}" y1="${y(v)}" y2="${y(v)}" stroke="${css('--border')}"/><text x="${w - 2}" y="${y(v) + 4}" font-size="11" text-anchor="end" fill="${css('--text-muted')}">${nf(v, 1)}%</text>`; }
   const step = Math.ceil(n / 6);
   vals.forEach((v, i) => { const cx = pad + slot * (i + 0.5);
     if (v > 0) s += `<rect x="${cx - bw / 2}" y="${y(v)}" width="${bw}" height="${Math.max(1, y(0) - y(v))}" rx="2" fill="${color}"><title>${ddmm(labels[i])}: ${nf(v, 2)}%</title></rect>`;
