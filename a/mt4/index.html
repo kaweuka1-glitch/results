@@ -209,7 +209,10 @@ function render() {
 
 function line(svg, vals, labels, color, unit) {
   const w = svg.clientWidth || 600, h = svg.clientHeight || 240, pad = 30;
-  const min = Math.min(0, ...vals), max = Math.max(0, ...vals), span = (max - min) || 1;
+  let min = Math.min(...vals), max = Math.max(...vals);
+  if (unit === '%') { min = Math.min(0, min); max = Math.max(0, max); }
+  else { const m = (max - min) * 0.15 || Math.max(1, Math.abs(max) * 0.002); min -= m; max += m; }   // деньги: масштаб по самим значениям
+  const span = (max - min) || 1;
   const x = i => pad + i * (w - pad * 2) / Math.max(1, vals.length - 1), y = v => h - pad - (v - min) / span * (h - pad * 2);
   const pts = vals.map((v, i) => `${x(i)},${y(v)}`).join(' ');
   let s = '';
@@ -221,12 +224,25 @@ function line(svg, vals, labels, color, unit) {
   s += `<polygon points="${x(0)},${base} ${pts} ${x(vals.length - 1)},${base}" fill="${color}" opacity=".14"/><polyline points="${pts}" fill="none" stroke="${color}" stroke-width="2" stroke-linejoin="round"/>`;
   svg.innerHTML = s;
 }
+function bars(svg, vals, labels, color) {     // просадка по дням столбиками вверх, %
+  const w = svg.clientWidth || 600, h = svg.clientHeight || 240, pad = 30;
+  const max = Math.max(0.5, ...vals) * 1.1, n = vals.length, slot = (w - pad * 2) / n, bw = Math.max(2, Math.min(18, slot * 0.6));
+  const y = v => h - pad - v / max * (h - pad * 2);
+  let s = '';
+  for (let k = 0; k <= 3; k++) { const v = max * k / 3;
+    s += `<line x1="${pad}" x2="${w - pad}" y1="${y(v)}" y2="${y(v)}" stroke="${css('--border')}"/><text x="${w - pad + 4}" y="${y(v) + 4}" font-size="11" fill="${css('--text-muted')}">${nf(v, 1)}%</text>`; }
+  const step = Math.ceil(n / 6);
+  vals.forEach((v, i) => { const cx = pad + slot * (i + 0.5);
+    if (v > 0) s += `<rect x="${cx - bw / 2}" y="${y(v)}" width="${bw}" height="${Math.max(1, y(0) - y(v))}" rx="2" fill="${color}"><title>${ddmm(labels[i])}: ${nf(v, 2)}%</title></rect>`;
+    if (i % step === 0) s += `<text x="${cx}" y="${h - 8}" font-size="11" text-anchor="middle" fill="${css('--text-muted')}">${ddmm(labels[i])}</text>`; });
+  svg.innerHTML = s;
+}
 function draw() {
   const svg = $('#chart'), lab = D.series.map(r => r[0]);
   if (svg) {
     if (mode === 'growth') line(svg, D.series.map(r => r[1]), lab, css('--accent'), '%');
     if (mode === 'balance') line(svg, D.series.map(r => r[2]), lab, css('--chart-2'), 'money');
-    if (mode === 'dd') line(svg, D.series.map(r => r[3]), lab, css('--danger'), '%');
+    if (mode === 'dd') bars(svg, D.series.map(r => -r[3]), lab, css('--danger'));
   }
   const m = $('#months'), w = m.clientWidth || 600, h = m.clientHeight || 180, base = h / 2 + 6;
   const bw = Math.min(64, w / (D.months.length * 2 + 1)), mx = Math.max(1, ...D.months.map(r => Math.abs(r[1])));
