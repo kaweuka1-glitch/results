@@ -109,6 +109,10 @@ th:not(:first-child), td:not(:first-child) { text-align: right; }
 .trades { white-space: nowrap; font-variant-numeric: tabular-nums; }
 .trades td, .trades th { padding: var(--s-2) var(--s-2); }
 .trades .spark { display: block; margin-left: auto; }
+.pager { display: flex; flex-wrap: wrap; gap: var(--s-2); justify-content: center; margin-top: var(--s-4); }
+.pager button { min-width: 40px; height: 36px; padding: 0 var(--s-3); border-radius: 8px; border: 1px solid var(--border); background: transparent; color: var(--text-muted); font: 500 14px var(--font-sans); cursor: pointer; }
+.pager button[aria-current="page"] { background: var(--accent); border-color: var(--accent); color: var(--bg, #0f1216); }
+.pager button:disabled { opacity: .4; cursor: default; }
 .side-long { color: var(--success); } .side-short { color: var(--danger); }
 tr:last-child td { border-bottom: 0; }
 

@@ -109,6 +109,10 @@ th:not(:first-child), td:not(:first-child) { text-align: right; }
 .trades { white-space: nowrap; font-variant-numeric: tabular-nums; }
 .trades td, .trades th { padding: var(--s-2) var(--s-2); }
 .trades .spark { display: block; margin-left: auto; }
+.pager { display: flex; flex-wrap: wrap; gap: var(--s-2); justify-content: center; margin-top: var(--s-4); }
+.pager button { min-width: 40px; height: 36px; padding: 0 var(--s-3); border-radius: 8px; border: 1px solid var(--border); background: transparent; color: var(--text-muted); font: 500 14px var(--font-sans); cursor: pointer; }
+.pager button[aria-current="page"] { background: var(--accent); border-color: var(--accent); color: var(--bg, #0f1216); }
+.pager button:disabled { opacity: .4; cursor: default; }
 .side-long { color: var(--success); } .side-short { color: var(--danger); }
 tr:last-child td { border-bottom: 0; }
 
@@ -169,7 +173,8 @@ function spark(path, profit) {        // мини-график: цена от в
 const ago = ts => { const m = Math.round((Date.now() / 1000 - ts) / 60);
   return m < 60 ? `${m} мин назад` : m < 1440 ? `${Math.round(m / 60)} ч назад` : `${Math.round(m / 1440)} дн. назад`; };
 const MONTHS = ['янв', 'фев', 'мар', 'апр', 'май', 'июн', 'июл', 'авг', 'сен', 'окт', 'ноя', 'дек'];
-let D = null, mode = 'growth';
+let D = null, mode = 'growth', page = 0;
+const PER_PAGE = 50;
 
 function render() {
   const cur = D.currency, started = D.started.split('-').reverse().join('.');
@@ -216,8 +221,8 @@ function render() {
       <div class="card">
         <h2>Закрытые сделки <span class="muted" style="font-weight:400">· ${D.trades_closed}</span></h2>
         ${D.history.length ? `<div class="tscroll"><table class="trades"><thead><tr><th scope="col">Вход</th><th scope="col">Выход</th><th scope="col">Инструмент</th><th scope="col">Сделка</th><th scope="col">Лоты</th><th scope="col">Цена входа</th><th scope="col">Цена выхода</th><th scope="col">TP</th><th scope="col">Длилась</th><th scope="col">Прибыль</th><th scope="col">%</th><th scope="col"><span class="sr">График</span></th></tr></thead><tbody>
-          ${D.history.map(([o, c, s, side, op, cp, p, g, path, lots, tp]) => `<tr><td>${dt(o)}</td><td>${dt(c)}</td><td>${s}</td><td class="side-${side}">${side === 'long' ? 'Лонг' : 'Шорт'}</td><td>${lots == null ? '—' : nf(lots, 2)}</td><td>${px(op)}</td><td>${px(cp)}</td><td>${px(tp)}</td><td>${dur(c - o)}</td><td class="${cls(p)}">${p > 0 ? '+' : ''}${money(p, cur)}</td><td class="${cls(g)}">${pct(g)}</td><td>${spark(path, p)}</td></tr>`).join('')}
-        </tbody></table></div>` : '<div class="empty">Закрытых сделок пока нет.</div>'}
+          ${D.history.slice(page * PER_PAGE, (page + 1) * PER_PAGE).map(([o, c, s, side, op, cp, p, g, path, lots, tp]) => `<tr><td>${dt(o)}</td><td>${dt(c)}</td><td>${s}</td><td class="side-${side}">${side === 'long' ? 'Лонг' : 'Шорт'}</td><td>${lots == null ? '—' : nf(lots, 2)}</td><td>${px(op)}</td><td>${px(cp)}</td><td>${px(tp)}</td><td>${dur(c - o)}</td><td class="${cls(p)}">${p > 0 ? '+' : ''}${money(p, cur)}</td><td class="${cls(g)}">${pct(g)}</td><td>${spark(path, p)}</td></tr>`).join('')}
+        </tbody></table></div>${pager()}` : '<div class="empty">Закрытых сделок пока нет.</div>'}
       </div>
     </div>`;
   document.querySelectorAll('.tab').forEach(b => {
@@ -261,6 +266,19 @@ function bars(svg, vals, labels, color) {     // просадка по дням 
 // у каждого месяца свой цвет (одинаковый каждый год); подпись над столбиком — зелёная/красная по знаку
 const MONTH_COLORS = ['#5b8def', '#f5a623', '#2fbf8f', '#e05fb4', '#e6c840', '#22b8cf',      // соседние месяцы — контрастные
                       '#f0705a', '#9b6bff', '#8bc34a', '#ff8f3f', '#b07cf0', '#e86a8a'];
+function pager() {                      // страницы по 50 сделок: ‹ 1 2 3 ›
+  const n = Math.ceil(D.history.length / PER_PAGE);
+  if (n < 2) return '';
+  let b = `<button type="button" data-p="${page - 1}" ${page ? '' : 'disabled'} aria-label="Назад">‹</button>`;
+  for (let i = 0; i < n; i++) b += `<button type="button" data-p="${i}" ${i === page ? 'aria-current="page"' : ''}>${i + 1}</button>`;
+  return `<nav class="pager" aria-label="Страницы сделок">${b}<button type="button" data-p="${page + 1}" ${page < n - 1 ? '' : 'disabled'} aria-label="Дальше">›</button></nav>`;
+}
+document.addEventListener('click', e => {
+  const b = e.target.closest('.pager button');
+  if (!b || b.disabled) return;
+  page = +b.dataset.p; render();
+  document.querySelector('.trades').scrollIntoView({ block: 'start', behavior: 'smooth' });
+});
 function draw() {
   const svg = $('#chart'), lab = D.series.map(r => r[0]);
   if (svg) {
