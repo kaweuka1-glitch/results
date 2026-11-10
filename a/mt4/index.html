@@ -105,6 +105,7 @@ table { width: 100%; border-collapse: collapse; font-size: 14px; line-height: 20
 th { text-align: left; font: 500 12px/16px var(--font-sans); color: var(--text-muted); padding: var(--s-2) var(--s-3); border-bottom: 1px solid var(--border); }
 td { padding: var(--s-2) var(--s-3); border-bottom: 1px solid var(--border); }
 th:not(:first-child), td:not(:first-child) { text-align: right; }
+.grid > * { min-width: 0; }                 /* широкая таблица не растягивает страницу — листается внутри */
 .tscroll { overflow-x: auto; margin: 0 calc(-1 * var(--s-3)); }
 .trades { white-space: nowrap; font-variant-numeric: tabular-nums; }
 .trades td, .trades th { padding: var(--s-2) var(--s-2); }
