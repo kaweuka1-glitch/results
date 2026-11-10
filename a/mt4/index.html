@@ -105,6 +105,11 @@ table { width: 100%; border-collapse: collapse; font-size: 14px; line-height: 20
 th { text-align: left; font: 500 12px/16px var(--font-sans); color: var(--text-muted); padding: var(--s-2) var(--s-3); border-bottom: 1px solid var(--border); }
 td { padding: var(--s-2) var(--s-3); border-bottom: 1px solid var(--border); }
 th:not(:first-child), td:not(:first-child) { text-align: right; }
+.tscroll { overflow-x: auto; margin: 0 calc(-1 * var(--s-3)); }
+.trades { white-space: nowrap; font-variant-numeric: tabular-nums; }
+.trades td, .trades th { padding: var(--s-2) var(--s-2); }
+.trades .spark { display: block; margin-left: auto; }
+.side-long { color: var(--success); } .side-short { color: var(--danger); }
 tr:last-child td { border-bottom: 0; }
 
 .cards { display: grid; gap: var(--s-4); grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); }
@@ -145,6 +150,22 @@ const pct = (v, d = 2) => v == null ? '—' : (v > 0 ? '+' : v < 0 ? '−' : '')
 const money = (v, cur) => v == null ? '—' : (v < 0 ? '−' : '') + nf(Math.abs(v)) + (cur === 'USD' ? ' $' : ' ' + cur);
 const cls = v => v > 0 ? 'plus' : v < 0 ? 'minus' : 'muted';
 const ddmm = iso => iso.slice(8, 10) + '.' + iso.slice(5, 7);
+const p2 = n => String(n).padStart(2, '0');
+const dt = ts => { const d = new Date(ts * 1000); return `${p2(d.getDate())}.${p2(d.getMonth() + 1)}.${String(d.getFullYear()).slice(2)} ${p2(d.getHours())}:${p2(d.getMinutes())}`; };
+const dur = sec => { const m = Math.round(sec / 60), d = Math.floor(m / 1440), h = Math.floor(m % 1440 / 60);
+  return d ? `${d} д ${h} ч` : h ? `${h} ч ${m % 60} мин` : `${m} мин`; };
+const px = v => v == null ? '—' : String(v);
+function spark(path, profit) {        // мини-график: цена от входа (точка слева) до выхода (точка справа)
+  if (!path || path.length < 2) return '<span class="muted">—</span>';
+  const w = 96, h = 30, p = 4, mn = Math.min(...path), mx = Math.max(...path), sp = (mx - mn) || 1;
+  const x = i => p + i * (w - 2 * p) / (path.length - 1), y = v => h - p - (v - mn) / sp * (h - 2 * p);
+  const pts = path.map((v, i) => `${x(i).toFixed(1)},${y(v).toFixed(1)}`).join(' ');
+  const end = profit >= 0 ? css('--success') : css('--danger'), n = path.length - 1;
+  return `<svg class="spark" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}" aria-hidden="true">
+    <polygon points="${x(0)},${h} ${pts} ${x(n)},${h}" fill="${css('--text-muted')}" opacity=".15"/>
+    <polyline points="${pts}" fill="none" stroke="${css('--text-muted')}" stroke-width="1.5" stroke-linejoin="round"/>
+    <circle cx="${x(0)}" cy="${y(path[0])}" r="3" fill="${css('--chart-2')}"/><circle cx="${x(n)}" cy="${y(path[n])}" r="3" fill="${end}"/></svg>`;
+}
 const ago = ts => { const m = Math.round((Date.now() / 1000 - ts) / 60);
   return m < 60 ? `${m} мин назад` : m < 1440 ? `${Math.round(m / 60)} ч назад` : `${Math.round(m / 1440)} дн. назад`; };
 const MONTHS = ['янв', 'фев', 'мар', 'апр', 'май', 'июн', 'июл', 'авг', 'сен', 'окт', 'ноя', 'дек'];
@@ -194,9 +215,9 @@ function render() {
     <div class="grid" style="grid-template-columns:1fr">
       <div class="card">
         <h2>Закрытые сделки <span class="muted" style="font-weight:400">· ${D.trades_closed}</span></h2>
-        ${D.history.length ? `<table><thead><tr><th scope="col">День</th><th scope="col">Инструмент</th><th scope="col">Прибыль</th><th scope="col">% к балансу</th></tr></thead><tbody>
-          ${D.history.map(([d, s, p, g]) => `<tr><td>${ddmm(d)}</td><td>${s}</td><td class="${cls(p)}">${p > 0 ? '+' : ''}${money(p, cur)}</td><td class="${cls(g)}">${pct(g)}</td></tr>`).join('')}
-        </tbody></table>` : '<div class="empty">Закрытых сделок пока нет.</div>'}
+        ${D.history.length ? `<div class="tscroll"><table class="trades"><thead><tr><th scope="col">Вход</th><th scope="col">Выход</th><th scope="col">Инструмент</th><th scope="col">Сделка</th><th scope="col">Цена входа</th><th scope="col">Цена выхода</th><th scope="col">Длилась</th><th scope="col">Прибыль</th><th scope="col">%</th><th scope="col"><span class="sr">График</span></th></tr></thead><tbody>
+          ${D.history.map(([o, c, s, side, op, cp, p, g, path]) => `<tr><td>${dt(o)}</td><td>${dt(c)}</td><td>${s}</td><td class="side-${side}">${side === 'long' ? 'Лонг' : 'Шорт'}</td><td>${px(op)}</td><td>${px(cp)}</td><td>${dur(c - o)}</td><td class="${cls(p)}">${p > 0 ? '+' : ''}${money(p, cur)}</td><td class="${cls(g)}">${pct(g)}</td><td>${spark(path, p)}</td></tr>`).join('')}
+        </tbody></table></div>` : '<div class="empty">Закрытых сделок пока нет.</div>'}
       </div>
     </div>`;
   document.querySelectorAll('.tab').forEach(b => {
@@ -257,7 +278,7 @@ function draw() {
 const themeBtn = $('#theme');
 const isLight = () => { const t = document.documentElement.dataset.theme; return t ? t === 'light' : matchMedia('(prefers-color-scheme: light)').matches; };
 const syncBtn = () => { themeBtn.textContent = isLight() ? 'Тёмная тема' : 'Светлая тема'; };
-themeBtn.addEventListener('click', () => { document.documentElement.dataset.theme = isLight() ? 'dark' : 'light'; syncBtn(); if (D) draw(); });
+themeBtn.addEventListener('click', () => { document.documentElement.dataset.theme = isLight() ? 'dark' : 'light'; syncBtn(); if (D) render(); });
 syncBtn();
 addEventListener('resize', () => D && draw());
 const load = window.RESULTS_DATA ? Promise.resolve(window.RESULTS_DATA) : fetch('data.json', { cache: 'no-store' }).then(r => { if (!r.ok) throw r.status; return r.json(); });
