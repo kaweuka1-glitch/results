@@ -258,6 +258,9 @@ function bars(svg, vals, labels, color) {     // просадка по дням 
     if (i % step === 0) s += `<text x="${cx}" y="${h - 8}" font-size="11" text-anchor="middle" fill="${css('--text-muted')}">${ddmm(labels[i])}</text>`; });
   svg.innerHTML = s;
 }
+// у каждого месяца свой цвет (одинаковый каждый год); подпись над столбиком — зелёная/красная по знаку
+const MONTH_COLORS = ['#5b8def', '#9b6bff', '#e05fb4', '#f0705a', '#f5a623', '#e6c840',
+                      '#8bc34a', '#2fbf8f', '#22b8cf', '#4f9dde', '#7c83f2', '#c27ce0'];
 function draw() {
   const svg = $('#chart'), lab = D.series.map(r => r[0]);
   if (svg) {
@@ -270,7 +273,7 @@ function draw() {
   let s = `<line x1="0" x2="${w}" y1="${base}" y2="${base}" stroke="${css('--border')}"/>`;
   D.months.forEach(([ym, v], i) => { const cx = w / 2 + (i - (D.months.length - 1) / 2) * bw * 1.8, bh = Math.abs(v) / mx * (h / 2 - 34);
     const col = v >= 0 ? css('--success') : css('--danger'), yy = v >= 0 ? base - bh : base;
-    s += `<rect x="${cx - bw / 2}" y="${yy}" width="${bw}" height="${Math.max(1, bh)}" rx="4" fill="${col}"/>`;
+    s += `<rect x="${cx - bw / 2}" y="${yy}" width="${bw}" height="${Math.max(1, bh)}" rx="4" fill="${MONTH_COLORS[+ym.slice(5) - 1]}"/>`;
     s += `<text x="${cx}" y="${v >= 0 ? yy - 6 : yy + bh + 14}" text-anchor="middle" font-size="12" font-weight="600" fill="${col}">${pct(v)}</text>`;
     s += `<text x="${cx}" y="${h - 4}" text-anchor="middle" font-size="11" fill="${css('--text-muted')}">${MONTHS[+ym.slice(5) - 1]} ${ym.slice(0, 4)}</text>`; });
   m.innerHTML = s;
