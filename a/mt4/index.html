@@ -238,7 +238,7 @@ function render() {
         </div>
         ${ttab === 'open' ? openTable() : D.history.length ? `<div class="tscroll"><table class="trades"><thead><tr><th scope="col">Вход</th><th scope="col">Выход</th><th scope="col">Инструмент</th><th scope="col">Сделка</th><th scope="col">Лоты</th><th scope="col">Цена входа</th><th scope="col">Цена выхода</th><th scope="col">TP</th><th scope="col">Длилась</th><th scope="col">Прибыль</th><th scope="col">%</th><th scope="col"><span class="sr">График</span></th></tr></thead><tbody>
           ${D.history.slice(page * PER_PAGE, (page + 1) * PER_PAGE).map(([o, c, s, side, op, cp, p, g, path, lots, tp]) => `<tr><td>${dt(o)}</td><td>${dt(c)}</td><td>${s}</td><td class="side-${side}">${side === 'long' ? 'Лонг' : 'Шорт'}</td><td>${lots == null ? '—' : nf(lots, 2)}</td><td>${px(op)}</td><td>${px(cp)}</td><td>${px(tp)}</td><td>${dur(c - o)}</td><td class="${cls(p)}">${p > 0 ? '+' : ''}${money(p, cur)}</td><td class="${cls(g)}">${pct(g)}</td><td>${spark(path, p)}</td></tr>`).join('')}
-        </tbody></table></div>${pager()}` : '<div class="empty">Закрытых сделок пока нет.</div>'}
+        </tbody><tfoot><tr class="total"><th scope="row" colspan="4">Всего проторговано · ${D.history.length} сд.</th><td>${nf(D.history.reduce((a, r) => a + (r[9] || 0), 0), 2)}</td><td colspan="7"></td></tr></tfoot></table></div>${pager()}` : '<div class="empty">Закрытых сделок пока нет.</div>'}
       </div>
     </div>`;
   document.querySelectorAll('.tab[data-k]').forEach(b => {
