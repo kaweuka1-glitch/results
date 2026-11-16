@@ -20,15 +20,7 @@
   --max-width: 1120px; --gutter: 24px;
   color-scheme: dark;
 }
-@media (prefers-color-scheme: light) {
-  :root:not([data-theme="dark"]) {
-    --bg: #ffffff; --surface: #f5f7f9; --surface-2: #eceff3; --border: #dfe4ea; --border-input: #7a8591;
-    --text: #121820; --text-muted: #556170; --accent: #0d7f6a; --on-accent: #ffffff;
-    --success: #147548; --danger: #b9343a; --warning: #8a5a00; --chart-2: #4561c9;
-    --shadow-card: 0 1px 2px rgba(16,24,40,.06), 0 1px 3px rgba(16,24,40,.10);
-    color-scheme: light;
-  }
-}
+/* Тёмная — у всех по умолчанию (Дан 16.11); светлая — только кнопкой, тема телефона/ПК не учитывается */
 :root[data-theme="light"] {
   --bg: #ffffff; --surface: #f5f7f9; --surface-2: #eceff3; --border: #dfe4ea; --border-input: #7a8591;
   --text: #121820; --text-muted: #556170; --accent: #0d7f6a; --on-accent: #ffffff;
