@@ -102,6 +102,11 @@ th:not(:first-child), td:not(:first-child) { text-align: right; }
 .trades { white-space: nowrap; font-variant-numeric: tabular-nums; }
 .trades td, .trades th { padding: var(--s-2) var(--s-2); }
 .trades .spark { display: block; margin-left: auto; }
+.th-sort { font: inherit; color: inherit; background: none; border: 0; padding: 0; cursor: pointer; display: inline-flex; align-items: center; gap: 4px; }
+.th-sort:hover { color: var(--text); }
+.th-sort .arr { font-size: 10px; opacity: .4; }
+.th-sort[data-on] { color: var(--text); }
+.th-sort[data-on] .arr { opacity: 1; color: var(--accent); }
 .pager { display: flex; flex-wrap: wrap; gap: var(--s-2); justify-content: center; margin-top: var(--s-4); }
 .pager button { min-width: 40px; height: 36px; padding: 0 var(--s-3); border-radius: 8px; border: 1px solid var(--border); background: transparent; color: var(--text-muted); font: 500 14px var(--font-sans); cursor: pointer; }
 .pager button[aria-current="page"] { background: var(--accent); border-color: var(--accent); color: var(--bg, #0f1216); }
